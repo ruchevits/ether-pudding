@@ -170,6 +170,51 @@ var SolidityEvent = require("web3/lib/web3/event.js");
         instance[item.name].sendTransaction = Utils.promisifyFunction(contract[item.name].sendTransaction, constructor);
         instance[item.name].request = contract[item.name].request;
         instance[item.name].estimateGas = Utils.promisifyFunction(contract[item.name].estimateGas, constructor);
+      
+        // Call method first
+        // If it returned errCode == 0, send transaction and resolve promise with txId
+        // Otherwise, reject promise with errCode
+        instance[item.name].callTransaction = (function(method, C) {
+          var self = this;
+          return function() {
+            var instance = this;
+
+            var args = Array.prototype.slice.call(arguments);
+            var args2 = args
+            var tx_params = {};
+            var last_arg = args[args.length - 1];
+
+            // It's only tx_params if it's an object and not a BigNumber.
+            if (Utils.is_object(last_arg) && !Utils.is_big_number(last_arg)) {
+              tx_params = args.pop();
+            }
+
+            tx_params = Utils.merge(C.class_defaults, tx_params);
+
+            return new Promise(function(accept, reject) {
+              var callback = function(error, result) {
+                if (error != null) {
+                  reject(error);
+                } else {
+                  var errCode = Number(result);
+                  if (errCode != 0) return reject(errCode)
+                  var callback2 = function(error, result) {
+                    if (error != null) {
+                      reject(error);
+                    } else {
+                      accept(result);
+                    }
+                  };
+                  args2.push(tx_params, callback2)
+                  method.sendTransaction.apply(instance.contract, args2);
+                }
+              };
+              args.push(tx_params, callback);
+              method.call.apply(instance.contract, args);
+            });
+          }
+        })(contract[item.name], constructor);
+
       }
 
       if (item.type == "event") {
