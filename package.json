@@ -1,16 +1,12 @@
 {
-  "name": "ether-pudding",
-  "version": "3.2.0",
+  "name": "tally-pudding",
+  "version": "3.2.1",
   "description": "Pudding - Contract packager for Ethereum and Javascript",
   "author": "Tim Coulter",
   "main": "./index.js",
   "private": false,
   "scripts": {
     "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/consensys/ether-pudding.git"
   },
   "license": "MIT",
   "devDependencies": {

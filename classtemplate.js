@@ -197,7 +197,7 @@ var SolidityEvent = require("web3/lib/web3/event.js");
                   reject(error);
                 } else {
                   var errCode = Number(result);
-                  if (errCode != 0) return reject(errCode)
+                  if (errCode != 0) return reject(constructor.errCodeHandler(errCode))
                   var callback2 = function(error, result) {
                     if (error != null) {
                       reject(error);
@@ -267,6 +267,10 @@ var SolidityEvent = require("web3/lib/web3/event.js");
   };
 
   Contract.currentProvider = null;
+
+  Contract.setErrCodeHandler = function(errCodeHandler) {
+    this.errCodeHandler = errCodeHandler
+  }
 
   Contract.setProvider = function(provider) {
     var wrapped = new Provider(provider);
